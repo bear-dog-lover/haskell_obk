@@ -1,0 +1,1 @@
+myLength lst = sum [1 | _ <- lst]

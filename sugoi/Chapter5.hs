@@ -71,7 +71,7 @@ sum' :: (Num a) => [a] -> a
 sum' xs = foldl (\acc x -> acc + x) 0 xs --2引数関数　アキュムレータ　畳み込み対象のリスト
 
 sum'' :: (Num a) => [a] -> a
-sum'' = foldl (+) 0
+sum'' = foldl (+) 0 --ポイントフリースタイル
 
 concat' :: (Num a) => [a] -> a
 concat' = foldl (\acc b -> acc * 10 + b) 0
@@ -110,3 +110,16 @@ and' xs = foldr (&&) True xs
 
 sqrtSums :: Int
 sqrtSums = length (takeWhile (<1000) (scanl1 (+) (map sqrt [1..]))) + 1
+
+--before
+fn x = ceiling (negate (tan (cos (max 50 x))))
+--after
+fn' = ceiling . negate . tan . cos . max 50
+
+--before
+oddSquareSum :: Integer
+oddSquareSum = sum (takeWhile (<10000) (filter odd (map (^2) [1..])))
+
+--after
+oddSquareSum' :: Integer
+oddSquareSum' = sum . takeWhile (<10000) . filter odd $ map (^2) [1..]

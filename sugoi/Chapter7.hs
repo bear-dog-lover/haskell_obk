@@ -1,3 +1,5 @@
+import qualified Data.Map as Map
+
 {-
 data Person = Person String String Int Float String String deriving (Show)
 
@@ -20,12 +22,14 @@ flavor :: Person -> String
 flavor (Person _ _ _ _ _ flavor) = flavor
 -}
 
+{-
 data Person = Person { firstName :: String
                      , lastName :: String
                      , age :: Int
                      , height :: Float
                      , phoneNumber :: String
                      , flavor :: String } deriving (Show)
+-}
 
 data Car = Car { company :: String
                , model :: String
@@ -46,3 +50,87 @@ dotProd :: (Num a) => Vector a -> Vector a -> a
 
 vmult :: (Num a) => Vector a -> a -> Vector a
 (Vector i j k) `vmult` m = Vector (i*m) (j*m) (k*m)
+
+data Person = Person { firstName :: String
+                     , lastName :: String
+                     , age :: Int
+                     } deriving (Eq, Show, Read)
+
+mysteryDude = "Person { firstName = \"Michael\"" ++
+                     ", lastName = \"Diamond\"" ++
+                     ", age = 43}"
+
+data Day = Monday | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday
+           deriving (Eq, Ord, Show, Read, Bounded, Enum)
+
+type PhoneNumber = String
+type Name = String
+type PhoneBook = [(Name, PhoneNumber)]
+phoneBook :: PhoneBook
+phoneBook = 
+    [("betty", "555-2938")
+    ,("bonnie", "452-2928")
+    ,("patsy", "493-2928")
+    ,("lucille", "205-2928")
+    ,("wendy", "939-8282")
+    ,("penny", "853-2492")
+    ]
+
+inPhoneBook :: Name -> PhoneNumber -> PhoneBook -> Bool
+inPhoneBook name pnumber pbook = (name, pnumber) `elem` pbook
+
+type AssocList k v = [(k, v)]
+--type IntMap v = Map.Map Int v
+type IntMap = Map.Map Int
+
+data LockerState = Taken | Free deriving (Show, Eq)
+
+type Code = String
+
+type LockerMap = Map.Map Int (LockerState, Code)
+
+lockerLookup :: Int -> LockerMap -> Either String Code
+lockerLookup lockerNumber map = case Map.lookup lockerNumber map of
+    Nothing -> Left $ "Locker " ++ show lockerNumber
+                      ++ " doesn't exist!"
+    Just (state, code) -> if state /= Taken
+                            then Right code
+                            else Left $ "Locker " ++ show lockerNumber
+                                        ++ " is already taken!"
+
+lockers :: LockerMap
+lockers = Map.fromList
+    [(100,(Taken, "ZD39I"))
+    ,(101,(Free, "JAH3I"))
+    ,(103,(Free, "IQSA9"))
+    ,(105,(Free, "QOTSA"))
+    ,(109,(Taken, "893JJ"))
+    ,(110,(Taken, "99292"))
+    ]
+
+infixr 5 :-:
+data List a = Empty | a :-: (List a) deriving (Show, Read, Eq, Ord)
+
+infixr 5 ^++
+(^++) :: List a -> List a -> List a
+Empty ^++ ys = ys
+(x :-: xs) ^++ ys = x :-: (xs ^++ ys)
+
+data Tree a = EmptyTree | Node a (Tree a) (Tree a) deriving (Show)
+
+singleton :: a -> Tree a
+singleton a = Node a EmptyTree EmptyTree
+
+insertTree :: (Ord a) => a -> Tree a -> Tree a
+insertTree a EmptyTree = singleton a
+insertTree a (Node b leftTree rightTree)
+    | a == b = Node b leftTree rightTree
+    | a < b  = Node b (insertTree a leftTree) rightTree
+    | a > b  = Node b leftTree (insertTree a rightTree)
+
+treeElem :: (Ord a) => a -> Tree a -> Bool
+treeElem _ EmptyTree = False
+treeElem x (Node a left right)
+    | x == a = True
+    | x < a  = treeElem x left
+    | x > a  = treeElem x right

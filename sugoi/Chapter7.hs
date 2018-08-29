@@ -118,15 +118,19 @@ Empty ^++ ys = ys
 
 data Tree a = EmptyTree | Node a (Tree a) (Tree a) deriving (Show)
 
+instance Functor Tree where
+    fmap f EmptyTree = EmptyTree
+    fmap f (Node x left right) = Node (f x) (fmap f left) (fmap f right)
+
 singleton :: a -> Tree a
 singleton a = Node a EmptyTree EmptyTree
 
-insertTree :: (Ord a) => a -> Tree a -> Tree a
-insertTree a EmptyTree = singleton a
-insertTree a (Node b leftTree rightTree)
-    | a == b = Node b leftTree rightTree
-    | a < b  = Node b (insertTree a leftTree) rightTree
-    | a > b  = Node b leftTree (insertTree a rightTree)
+treeInsert :: (Ord a) => a -> Tree a -> Tree a
+treeInsert x EmptyTree = singleton x
+treeInsert x (Node a leftTree rightTree)
+    | x == a = Node x leftTree rightTree
+    | x < a  = Node a (treeInsert x leftTree) rightTree
+    | x > a  = Node a leftTree (treeInsert x rightTree)
 
 treeElem :: (Ord a) => a -> Tree a -> Bool
 treeElem _ EmptyTree = False
@@ -134,3 +138,42 @@ treeElem x (Node a left right)
     | x == a = True
     | x < a  = treeElem x left
     | x > a  = treeElem x right
+
+data TrafficLight = Red | Yellow | Green
+instance Eq TrafficLight where
+    Red == Red = True
+    Green == Green = True
+    Yellow == Yellow = True
+    _ == _ = False
+
+instance Show TrafficLight where
+    show Red = "Red light"
+    show Yellow = "Yellow light"
+    show Green = "Green light"
+
+class YesNo a where
+    yesno :: a -> Bool
+instance YesNo Int where
+    yesno 0 = False
+    yesno _ = True
+instance YesNo [a] where
+    yesno [] = False
+    yesno _ = True
+instance YesNo Bool where
+    yesno = id
+instance YesNo (Maybe a) where
+    yesno (Just _) = True
+    yesno Nothing = False
+instance YesNo (Tree a) where
+    yesno EmptyTree = False
+    yesno _ = True
+instance YesNo TrafficLight where
+    yesno Red = False
+    yesno Yellow = True
+    yesno _ = True
+
+yesnoIf :: (YesNo y) => y -> a -> a -> a
+yesnoIf yesnoVal yesResult noResult = 
+    if yesno yesnoVal
+        then yesResult
+        else noResult
